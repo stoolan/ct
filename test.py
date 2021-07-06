@@ -85,13 +85,15 @@ def test_problem_1(data, metric_function, dimensions):
         CREATE TABLE metrics (
             metric_label string,
             -- in reality, I would make this "metric_label" ^^
-            -- a FK to a `metric_types` table
+            -- a FK to a `metric_labels` table
             -- that included more info about the metric type,
             -- such as an array column of the dimensions that it groups by
             parameters jsonb,
             metric_value numeric,
         )
         """
+
+        # or this might be a good time to put it in Mongo if you use that.
 
         # but for now i'll append them to a list
         results.append(result)

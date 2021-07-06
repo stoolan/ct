@@ -42,20 +42,28 @@ def compute_metric(data, dimensions, metric_function):
         metric_label = f"{metric_function.label}: {metric_label}"
         # e.g. "CD/CEB: Age in 5-year groups, Type of place of residence, Has radio"
 
-    # make the parameters column
+    # 2) make the parameters column that specifies the exact dimension group
     def to_params(group):
         """
         transform the group index into "parameters" json struct
+
+        for example, given dimensions "Time to get to water source (minutes)" and "Type of toilet facility"
+        and group values of 45 and "flush to pit latrine", respectively,
+        return
+        {
+          "Time to get to water source (minutes)": 45,
+          "Type of toilet facility": "flush to pit latrine"
+        }
         """
         # NOTE: there is probably a better way to do this, but this works:
         # Get the first value from the dimension column from the group
         # (since it is grouped by the dim, the values in this column are guarenteed to be identical)
-        index_keys = {dimension: group[dimension].values[0] for dimension in dimensions}
+        params = {dimension: group[dimension].values[0] for dimension in dimensions}
 
         # NOTE: could implement a more serializer/type-caster here
         # e.g.`json.dumps` or maybe marshmallow validation
         # depending on where this data is going.
-        return index_keys
+        return params
 
     labeled = data.groupby(dimensions).apply(to_params).to_frame()
     labeled.columns = ["parameters"]
