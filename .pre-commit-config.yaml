@@ -1,0 +1,15 @@
+repos:
+-   repo: https://github.com/ambv/black
+    rev: 20.8b1
+    hooks:
+    - id: black
+      language_version: python3.7
+-   repo: https://github.com/hadialqattan/pycln
+    rev: v0.0.1-beta.2 # Possible releases: https://github.com/hadialqattan/pycln/tags
+    hooks:
+      - id: pycln
+-   repo: https://github.com/pycqa/isort
+    rev: 5.5.4
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]

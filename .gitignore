@@ -1,0 +1,4 @@
+# General Purpose
+__pycache__
+.python-version
+.pytest_cache
