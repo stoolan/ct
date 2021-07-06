@@ -10,11 +10,14 @@ import solution
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
+# our example metric calculation:
 def custom_metric(group):
-    """ implement the metric defined as CE/CEB, within a particular group """
-    return (group["Sons who have died"] + group["Daughters who have died"]).sum() / (
-        group["Total children ever born"].sum()
-    )
+    """ implement the metric defined as CD/CEB, within a particular group """
+    children_died = (
+        group["Sons who have died"] + group["Daughters who have died"]
+    ).sum()
+    children_ever_born = group["Total children ever born"].sum()
+    return children_died / children_ever_born
 
 
 # lets decorate this function with a nice label we'll hook into
@@ -52,7 +55,7 @@ dimensions_to_combine = [
         dimensions_to_combine[3:6],
         # you uncomment the full `dimensions_to_combine` and run them here
         # but since it is slow (many permutations) I have it commented out:
-        # dimensions_to_combine[:]
+        # dimensions_to_combine[:],
     ],
 )
 @pytest.mark.parametrize(
