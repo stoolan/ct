@@ -121,7 +121,7 @@ def test_problem_1(data, metric_function, dimensions):
 @pytest.fixture
 def assert_algo_validity():
     """
-    continuously ensure our algorithm
+    continuously ensure our algorithm for problem 2
     correctly filters out below-threshold combinations
     """
     # let's take note of the dimension subsets we're filtering out
@@ -138,11 +138,10 @@ def assert_algo_validity():
         check all combos of ignored dimension subsets
         and make sure they are not in the raw data
         """
-        # this is a test-only function
-        # let's take a copy of the data so as not to mutate the dataframe
-        raw_data = raw_data.copy()
 
         to_ignore[tuple(dimensions)] = ignored_combinations
+
+        # loop through all heretofore ignored subsets
         for dims, combinations in to_ignore.items():
             for combo in combinations.index.tolist():
                 if not hasattr(combo, "__iter__"):
@@ -150,25 +149,18 @@ def assert_algo_validity():
                     combo = (combo,)
                 # there is probably a better way to do this
                 # but for now, just iteratively filter down raw data
+                # this is a test-only function
+                # let's take a copy of the data so as not to mutate the dataframe
+                dat = raw_data.copy()
                 for dim, val in zip(dims, combo):
-                    raw_data = raw_data[raw_data[dim] == val]
+                    dat = dat[raw_data[dim] == val]
                 # and after all that filtering it should be empty
-                assert raw_data.empty
+                assert dat.empty
 
     yield ensure_no_blacklisted_data
 
 
-@pytest.mark.parametrize(
-    # run the test on a set of dimensions to combine
-    "dimensions",
-    [
-        dimensions_to_combine[0:2],
-        dimensions_to_combine[3:6],
-        # you uncomment the full `dimensions_to_combine` and run them here
-        # but since it is slow (many permutations) I have it commented out:
-        # dimensions_to_combine[:],
-    ],
-)
+@pytest.mark.parametrize("dimensions", [dimensions_to_combine])
 @pytest.mark.parametrize("threshold", [1, 5, 10, 50])  # example row threshold
 def test_problem_2(data, threshold, dimensions, assert_algo_validity):
     """ PROBLEM 2 IMPLEMENTATION -----------------"""
