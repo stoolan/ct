@@ -1,3 +1,4 @@
+import json
 import logging
 import sys
 
@@ -44,9 +45,15 @@ dimensions_to_combine = [
 
 
 @pytest.mark.parametrize(
-    # run the test on a subset and full set of dimensions to combine
+    # run the test on a set of dimensions to combine
     "dimensions",
-    [dimensions_to_combine[0:2], dimensions_to_combine],
+    [
+        dimensions_to_combine[0:2],
+        dimensions_to_combine[3:6],
+        # you uncomment the full `dimensions_to_combine` and run them here
+        # but since it is slow (many permutations) I have it commented out:
+        # dimensions_to_combine[:]
+    ],
 )
 @pytest.mark.parametrize(
     # run the test on an arbitrary metric function
@@ -88,5 +95,33 @@ def test_problem_1(data, metric_function, dimensions):
 
     # what's nice about this implementation is that I can concatenate all my results
     # because they share the same data format
+    # and i'll prove it here:
     df = pd.concat(results)
-    return df
+    assert len(df.columns) == 3
+    assert all(set(res.columns) == set(df.columns) for res in results)
+
+    # also i can prove that my composite primary key is unique:
+    n_rows = df.shape[0]
+
+    # but to do so i'll have to convert parameters to a string to make it hashable:
+    df["parameters"] = df.parameters.apply(lambda x: json.dumps(x, default=str))
+
+    # then i can compute unique rows
+    n_unique_rows = df[["metric_label", "parameters"]].drop_duplicates().shape[0]
+
+    # and prove the PK is unique
+    assert n_rows == n_unique_rows
+
+
+#
+# def test_problem_2(data):
+#     """ PROBLEM 2 IMPLEMENTATION -----------------"""
+#     # Develop an algorithm that only computes the ratio metric
+#     # for a narrower subset of combinations
+#     # that each meet a minimum threshold of rows.
+#
+#     # ^^ What does this mean "each meet a minimum threshold of rows"
+#
+#     def groom(data, dimensions, threshold):
+#         """ groom data such that combos with a count below a certain threshold arent used """
+#         pass

@@ -1,16 +1,13 @@
 import itertools
 import logging
-import sys
-
-import pandas as pd
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 # I'm going to use pandas to mock data structures
 # These pandas statements could be transcribed to
 # PySpark, SQLAlchemy, or other datasource connectors fairly easily
 # But for a small, portable example, pandas is quickest
+import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 def compute_metric(data, dimensions, metric_function):
@@ -36,8 +33,8 @@ def compute_metric(data, dimensions, metric_function):
     # These two columns will serve as a kind of
     # composite primary key of a generic "metrics" table
 
-    # make a meaningful label
-    # this metric means "A slice grouped by these dimensions"
+    # 1) lets make a meaningful label
+    # i.e. describe the metric as "A metric computed over a slice of these dimensions"
     metric_label = ", ".join(dimensions)
     # make the label have the metric name in it as well
     # we'll hook into this nice metric_function attribute for that
@@ -84,35 +81,3 @@ def dimension_subsets(dimensions):
         # yield combinations of length i
         for c in itertools.combinations(dimensions, i + 1):
             yield c
-
-
-def problem_2():
-    """ PROBLEM 2 IMPLEMENTATION -----------------"""
-    # Develop an algorithm that only computes the ratio metric
-    # for a narrower subset of combinations
-    # that each meet a minimum threshold of rows.
-
-    # ^^ What does this mean "each meet a minimum threshold of rows"
-
-    def groom(data, dimensions, threshold):
-        """ groom data such that combos with a count below a certain threshold arent used """
-        pass
-
-
-# I'll give this a quick and dirty CLI
-# this could be done better in about a thousand ways
-# but sometimes KISS is the way to go
-
-if __name__ == "__main__":
-    valid_problems = dict(problem_1=problem_1, problem_2=problem_2)
-    try:
-        # specify a problem to run via CLI:
-        prob = sys.argv[1]
-    except IndexError:
-        logger.warning(f"provide problem as a flag")
-    else:
-        if prob not in valid_problems:
-            logger.warning(f'specify either {" or ".join(valid_problems.keys())}')
-        else:
-            # call the function specified in CLI arg
-            valid_problems[prob].__call__()

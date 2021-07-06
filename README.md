@@ -19,10 +19,18 @@ git clone this-repo@github.com
 
 ## Execution
 
-There isn't really a deliverable here, just a bunch of numbers that get computed.
+I separated the logic (`solution.py`) and the application (`test.py`),
+in order that the logic be testable against other datasets. The tests import the solution and run it across the provided data.
 
-I ran the data in as tests, you can run them like so:
+You can execute the tests like so:
+
 ```bash
 
 pytest test.py # use -s flag to print logs to stdout
+
+# or to run a specific test:
+
+pytest test.py::test_problem_1
+
+pytest test.py::test_problem_2
 ```
