@@ -10,8 +10,34 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
+def dimension_subsets(dimensions):
+    """ implement a dimension-combination generator"""
+    # "Every possible combination" means all combinations
+    # up to the total number of dimensions (in this case, 3).
+    # So, that would mean 1, 2, and 3-dimensional cuts of the metric.
+
+    # loop thru number of dimensions
+    for i in range(len(dimensions)):
+        # yield combinations of length i
+        for c in itertools.combinations(dimensions, i + 1):
+            yield c
+
+
 def compute_metric(data, dimensions, metric_function):
-    """a generic metric applicator to a dimension group"""
+    """
+    Apply a an arbitrary aggregation function against an arbitrary group of dimensions.
+
+    args:
+        data: raw fact table as pandas dataframe
+        dimensions: a list of dimensions to group by
+        metric_function: a callable to calculate a metric within a group
+
+    returns a dataframe with columns `metric_label`, `parameters` and `metric_value`
+
+    e.g.
+
+
+    """
 
     # grouping and performing an arbitrary aggregation
     # is an easy and well-known problem, whose solution is implemented in one-line:
@@ -76,16 +102,3 @@ def compute_metric(data, dimensions, metric_function):
     result["metric_label"] = metric_label
     logger.info(f"Computed {result.shape[0]:0,} results for {metric_label}")
     return result
-
-
-def dimension_subsets(dimensions):
-    """ implement a dimension-combination generator"""
-    # "Every possible combination" means all combinations
-    # up to the total number of dimensions (in this case, 3).
-    # So, that would mean 1, 2, and 3-dimensional cuts of the metric.
-
-    # loop thru number of dimensions
-    for i in range(len(dimensions)):
-        # yield combinations of length i
-        for c in itertools.combinations(dimensions, i + 1):
-            yield c

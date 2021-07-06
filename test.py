@@ -118,15 +118,83 @@ def test_problem_1(data, metric_function, dimensions):
     assert n_rows == n_unique_rows
 
 
-#
-# def test_problem_2(data):
-#     """ PROBLEM 2 IMPLEMENTATION -----------------"""
-#     # Develop an algorithm that only computes the ratio metric
-#     # for a narrower subset of combinations
-#     # that each meet a minimum threshold of rows.
-#
-#     # ^^ What does this mean "each meet a minimum threshold of rows"
-#
-#     def groom(data, dimensions, threshold):
-#         """ groom data such that combos with a count below a certain threshold arent used """
-#         pass
+@pytest.fixture
+def assert_algo_validity():
+    """
+    continuously ensure our algorithm
+    correctly filters out below-threshold combinations
+    """
+    # let's take note of the dimension subsets we're filtering out
+    # we are going to use them to make some assertions
+    # about the correctness of the algorithm
+
+    # this dict will hold *all* filters made
+    to_ignore = {}
+
+    # this func will check all filters for all dimension subsets
+    # and make sure its not in the raw data
+    def ensure_no_blacklisted_data(dimensions, ignored_combinations, raw_data):
+        """
+        check all combos of ignored dimension subsets
+        and make sure they are not in the raw data
+        """
+        # this is a test-only function
+        # let's take a copy of the data so as not to mutate the dataframe
+        raw_data = raw_data.copy()
+
+        to_ignore[tuple(dimensions)] = ignored_combinations
+        for dims, combinations in to_ignore.items():
+            for combo in combinations.index.tolist():
+                if not hasattr(combo, "__iter__"):
+                    # special case for 1-element sets
+                    combo = (combo,)
+                # there is probably a better way to do this
+                # but for now, just iteratively filter down raw data
+                for dim, val in zip(dims, combo):
+                    raw_data = raw_data[raw_data[dim] == val]
+                # and after all that filtering it should be empty
+                assert raw_data.empty
+
+    yield ensure_no_blacklisted_data
+
+
+@pytest.mark.parametrize(
+    # run the test on a set of dimensions to combine
+    "dimensions",
+    [
+        dimensions_to_combine[0:2],
+        dimensions_to_combine[3:6],
+        # you uncomment the full `dimensions_to_combine` and run them here
+        # but since it is slow (many permutations) I have it commented out:
+        # dimensions_to_combine[:],
+    ],
+)
+@pytest.mark.parametrize("threshold", [1, 5, 10, 50])  # example row threshold
+def test_problem_2(data, threshold, dimensions, assert_algo_validity):
+    """ PROBLEM 2 IMPLEMENTATION -----------------"""
+    # Develop an algorithm that only computes the ratio metric
+    # for a narrower subset of combinations
+    # that each meet a minimum threshold of rows.
+
+    results = []
+
+    # loop thru combinations
+    # from 1-element combinations to len(dimensions)
+    for dimension_tuple in solution.dimension_subsets(dimensions):
+        # calculate the count of values for each dimension group
+        group = list(dimension_tuple)
+        counts = data.groupby(group).agg({data.columns[0]: "count"})
+        counts.columns = ["n_observations"]
+        # note which one's we're filtering out for testing algo correctness
+        filtered_out = counts[counts.n_observations < threshold]
+        # filter out dimension groups below the threshold
+        counts = counts[counts.n_observations >= threshold]
+        # this inner join eliminates the dimension groups below the threshold from the data
+        # for this and all future iterations of the loop
+        data = data.merge(counts, left_on=group, right_index=True)
+        # test that our filter worked
+        assert_algo_validity(group, filtered_out, data)
+        # compute the result
+        result = solution.compute_metric(data, dimensions, custom_metric)
+        # send it to outer space.
+        results.append(result)
