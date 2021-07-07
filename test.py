@@ -186,7 +186,8 @@ def test_problem_2(data, threshold, dimensions, assert_algo_validity):
         data = data.merge(counts, left_on=group, right_index=True)
         # test that our filter worked
         assert_algo_validity(group, filtered_out, data)
+        assert not data.empty
         # compute the result
-        result = solution.compute_metric(data, dimensions, custom_metric)
+        result = solution.compute_metric(data, group, custom_metric)
         # send it to outer space.
         results.append(result)
